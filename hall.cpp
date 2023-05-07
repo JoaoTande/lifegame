@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+
 hall::hall(int x, int y, int screen_Wj, int screen_Hj) : interfaceComponent() {
 	x0 = x;
 	y0 = y;
@@ -15,7 +16,10 @@ hall::hall(int x, int y, int screen_Wj, int screen_Hj) : interfaceComponent() {
 	bloco_x0 = 0;
 	bloco_y0 = 0;
 
-	keys[6] = {0};
+    //keys[6] = {0};
+
+    memset(keys,0, sizeof(keys));
+
 
 	ALLEGRO_MOUSE_STATE state;
 	al_get_mouse_state(&state);
@@ -68,6 +72,8 @@ void hall::calcNumBlocs(){
 }
 
 void hall::draw_line(){
+
+#if 1
    ALLEGRO_COLOR color;
    color = al_map_rgb_f(0.3, 0.3, 0.3);
    int x = x0;
@@ -85,6 +91,7 @@ void hall::draw_line(){
    	   al_draw_line(x, y, x, y+height, color, 0);
    	   x = x + size;
     }
+#endif
 }
 
 void hall::draw_text(){
@@ -156,31 +163,31 @@ void hall::restoreScreenBackup(bool){
 
 void hall::setButtonCallBack_Reset(myButton &b1){
 	buttonReset = &b1;
-	funcCallBack f1 = &myButtonCallBack::resetAll;
+    funcCallBack f1 = &myButtonCallback::resetAll;
 	b1.registerCallBack(this, f1);
 }
 
 void hall::setButtonCallBack_Restore(myButton &b1){
 	buttonRestore = &b1;
-	funcCallBack f1 = &myButtonCallBack::restoreScreenBackup;
+    funcCallBack f1 = &myButtonCallback::restoreScreenBackup;
 	b1.registerCallBack(this, f1);
 }
 
 void hall::setButtonCallBack_FunPatterns(myButton &b1){
 	buttonFunPatterns = &b1;
-	funcCallBack f1 = &myButtonCallBack::loadFunPatterns;
+    funcCallBack f1 = &myButtonCallback::loadFunPatterns;
 	b1.registerCallBack(this, f1);
 }
 
 void hall::setButtonCallBack_SaveFile(myButton &b1){
 	buttonSaveFile = &b1;
-	funcCallBack f1 = &myButtonCallBack::saveFile;
+    funcCallBack f1 = &myButtonCallback::saveFile;
 	b1.registerCallBack(this, f1);
 }
 
 void hall::setButtonCallBack_LoadFile(myButton &b1){
 	buttonLoadFile = &b1;
-	funcCallBack f1 = &myButtonCallBack::loadFile;
+    funcCallBack f1 = &myButtonCallback::loadFile;
 	b1.registerCallBack(this, f1);
 }
 
@@ -268,11 +275,13 @@ void hall::CreateAndKillLife(){
 
 void hall::update(){
 	moveGrid();
+    contAllNeighbors();
+    CreateAndKillLife();
 }
 
 void hall::draw(){
-    contAllNeighbors();
-	CreateAndKillLife();
+    //contAllNeighbors();
+    //CreateAndKillLife();
 	draw_line();
 	draw_markers();
 	draw_text();
@@ -281,6 +290,10 @@ void hall::draw(){
 			QuadradosList[i+bloco_x0][j+bloco_y0].draw();
 		}
 	}
+
+#ifdef GAME_DEBUG
+    renderMouseDebug();
+#endif
 }
 
 void hall::setQuadradoInf(){
@@ -381,20 +394,34 @@ Position hall::get_Position(int pos_x, int pos_y){
 
 void hall::mouse_event_input(ALLEGRO_EVENT *ev){
 	ALLEGRO_MOUSE_STATE state;
+    al_get_mouse_state(&state);
 
-	if(ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN){
-		al_get_mouse_state(&state);
-		if (state.buttons & 1) {
-			/* Primary (e.g. left) mouse button is held. */
-			//printf("KKKK Mouse position: (%d, %d)\n", state.x, state.y);
-			if(!play){
-				Position Q1 = get_Position(state.x, state.y);
-				if((Q1.x >= 0)&&(Q1.y >= 0)){
-					QuadradosList[Q1.x][Q1.y].toogle();
-				}
-			}
-		}
-	}
+
+    if (state.buttons & 1) {
+        /* Primary (e.g. left) mouse button is held. */
+        //printf("KKKK Mouse position: (%d, %d)\n", state.x, state.y);
+        if(!play){
+            Position Q1 = get_Position(state.x, state.y);
+            if((Q1.x >= 0)&&(Q1.y >= 0)){
+                if(!QuadradosList[Q1.x][Q1.y].checked){
+                    QuadradosList[Q1.x][Q1.y].toogle();
+                }
+            }
+        }
+    }
+
+    if (state.buttons & 2) {
+        /* Primary (e.g. left) mouse button is held. */
+        //printf("KKKK Mouse position: (%d, %d)\n", state.x, state.y);
+        if(!play){
+            Position Q1 = get_Position(state.x, state.y);
+            if((Q1.x >= 0)&&(Q1.y >= 0)){
+                if(QuadradosList[Q1.x][Q1.y].checked){
+                    QuadradosList[Q1.x][Q1.y].toogle();
+                }
+            }
+        }
+    }
 
 	if(ev->type == ALLEGRO_EVENT_MOUSE_AXES){
 		al_get_mouse_state(&state);
@@ -601,7 +628,7 @@ void hall::FuncCallBack(bool pressed){
 }
 
 void hall::setButtonCallBack(myButton &b1){
-	funcCallBack f1 = &myButtonCallBack::FuncCallBack;
+    funcCallBack f1 = &myButtonCallback::FuncCallBack;
 	b1.registerCallBack(this, f1);
 }
 
@@ -622,49 +649,54 @@ int hall::saveToFile (const std::string file) {
 int hall::readFile (const std::string file) {
 	std::string line;
 	std::ifstream myfile (file);
-	if (myfile.is_open())
-	{
-		resetAll(true);
-		getline (myfile,line);
-		std::stringstream gridInfo(line);
-		std::string word0;
-		int numX = -1;
-		int numY = -1;
-		gridInfo >> numX;
-		gridInfo >> numY;
 
-		while ( getline (myfile,line) )
-	    {
+    if(myfile.bad()){
+        return -1;
+    }
 
-			std::stringstream ss(line);
-			std::string word;
-			int i = -1;
-			int j = -1;
-			bool check = false;
-			ss >> i;
-			ss >> j;
-			ss >> check;
-			if((i < numero_x)&&(j < numero_y) && !QuadradosList[i][j].checked){
-				QuadradosList[i][j].checked = check;
-			}
-	    }
-	    myfile.close();
-	}
-  return 0;
+
+
+
+    resetAll(true);
+    getline (myfile,line);
+    std::stringstream gridInfo(line);
+    std::string word0;
+    int numX = -1;
+    int numY = -1;
+    gridInfo >> numX;
+    gridInfo >> numY;
+
+    while ( getline (myfile,line) )
+    {
+
+        std::stringstream ss(line);
+        std::string word;
+        int i = -1;
+        int j = -1;
+        bool check = false;
+        ss >> i;
+        ss >> j;
+        ss >> check;
+        if((i < numero_x)&&(j < numero_y) && !QuadradosList[i][j].checked){
+            QuadradosList[i][j].checked = check;
+        }
+    }
+    myfile.close();
+    return 0;
 }
 
 void hall::setButtonCallBack_NextSpeed(myButton &b1){
-    funcCallBack cb = &myButtonCallBack::NextSpeed;
+    funcCallBack cb = &myButtonCallback::NextSpeed;
     b1.registerCallBack(this,cb);
 }
 
 void hall::setButtonCallBack_PrevSpeed(myButton &b1){
-    funcCallBack cb = &myButtonCallBack::PrevSpeed;
+    funcCallBack cb = &myButtonCallback::PrevSpeed;
     b1.registerCallBack(this,cb);
 }
 
 void hall::setButtonCallBack_Zoom(myButton &b1){
-	funcCallBack cb = &myButtonCallBack::changeSize;
+    funcCallBack cb = &myButtonCallback::changeSize;
 	b1.registerCallBack(this,cb);
 }
 
@@ -704,4 +736,15 @@ void hall::changeSize(bool zoom){
 void hall::update_input(ALLEGRO_EVENT *e){
     mouse_event_input(e);
     keyboard_event_input(e);
+}
+
+void hall::renderMouseDebug()
+{
+    ALLEGRO_MOUSE_STATE state;
+    al_get_mouse_state(&state);
+
+    al_draw_textf(text_font, al_map_rgb(255,0,0), 10,100,0, "BOTAO ESQUERDO %s", state.buttons & 1 ? "PRESSIONADO" : "LIVRE");
+    al_draw_textf(text_font, al_map_rgb(255,0,0), 10,120,0, "BOTAO DIREITO %s", state.buttons & 2 ? "PRESSIONADO" : "LIVRE");
+    al_draw_textf(text_font, al_map_rgb(255,0,0), 10,140,0, "X: %d Y: %d", state.x, state.y);
+
 }

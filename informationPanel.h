@@ -10,13 +10,13 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_native_dialog.h>
 #include "interfaceComponent.h"
-#include "classCallBack.h"
+#include "myButtonCallback.h"
 #include "button.h"
 #include "gameScreenContext.h"
 
 
 
-class myInformationPanel: public interfaceComponent, myButtonCallBack{
+class myInformationPanel: public interfaceComponent, myButtonCallback{
 private:
 	int x0;
 	int y0;

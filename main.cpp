@@ -1,37 +1,21 @@
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_acodec.h>
-#include <allegro5/allegro_audio.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_image.h>
-#include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_ttf.h>
-#include <allegro5/allegro_native_dialog.h>
-#include <stdio.h>
-#include <math.h>
-#include <iostream>
-#include "hall.h"
-#include "button.h"
-#include "gameScreenContext.h"
-#include "bigTextLabel.h"
-#include "informationPanel.h"
-#include "config.h"
+#include "main.h"
 
 
 
 static int SCREEN_W = 1300;
 static int SCREEN_H = 700;
 
-const double FPS = 60.0f;
+static double FPS = 60.0;
 static bool background_mode = false;
 static bool paused = false;
 
 bool fullscreen = false;
 
-static constexpr double MAX_TIMEOUT = (1.0 / 30);
+//static constexpr double MAX_TIMEOUT = (1.0 / FPS);
 
-ALLEGRO_DISPLAY *display = NULL;
-ALLEGRO_EVENT_QUEUE *event_queue = NULL;
-ALLEGRO_TIMER *timer = NULL;
+ALLEGRO_DISPLAY *display = nullptr;
+ALLEGRO_EVENT_QUEUE *event_queue = nullptr;
+ALLEGRO_TIMER *timer = nullptr;
 
 const ALLEGRO_COLOR white = al_map_rgb_f(1.0, 1.0, 1.0);
 const ALLEGRO_COLOR red = al_map_rgb_f(1.0, 1.0, 1.0);
@@ -42,7 +26,12 @@ bool redraw = false;
 
 static Config config;
 
-int init_allegro(void)
+
+
+
+GameState g_gamestate = GameState::MAIN_MENU_SCREEN;
+
+static int init_allegro(void)
 {
 
 
@@ -76,8 +65,24 @@ int init_allegro(void)
 
 
 		// Initialize the timer
-		timer = al_create_timer(1.0 / FPS);
-		if (!timer) {
+
+
+        double fps_desired = Config::getConfigFloat(config, "game", "max_fps_desired", FPS);
+        int laptop_mode =   Config::getConfigInt(config, "game", "laptop_mode", 0);
+
+
+        if(laptop_mode){
+            timer = al_create_timer(1.0 / 30.0);
+        }else {
+            if(fps_desired > 60.0){
+                fprintf(stdout, "please set CFG  FPS less or equal to 60, higher speed can have some slowness issues");
+            }
+
+            timer = al_create_timer(1.0 / fps_desired);
+        }
+
+
+        if (!timer) {
 			fprintf(stderr, "Failed to create timer.\n");
 			return 1;
 		}
@@ -89,7 +94,7 @@ int init_allegro(void)
 			SCREEN_H = info.y2 - info.y1 - 80;
 		}
 
-        int flags = ALLEGRO_OPENGL_3_0;
+        int flags = ALLEGRO_OPENGL_FORWARD_COMPATIBLE | ALLEGRO_PROGRAMMABLE_PIPELINE;
 
         if(fullscreen){
             flags |= ALLEGRO_FULLSCREEN_WINDOW;
@@ -100,26 +105,58 @@ int init_allegro(void)
 		// Create the display
 		al_set_new_display_flags(flags);
 
-		display = al_create_display(SCREEN_W, SCREEN_H);
-		if (!display) {
+        al_set_new_display_option(ALLEGRO_SAMPLES,1, ALLEGRO_SUGGEST);
+        al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS,1,ALLEGRO_SUGGEST);
+
+
+        int vsync_enabled = Config::getConfigInt(config, "game", "vsync");
+
+        if(vsync_enabled < 0) vsync_enabled = 0;
+        if(vsync_enabled > 1) vsync_enabled = 1;
+
+
+        al_set_new_display_option(ALLEGRO_VSYNC, vsync_enabled, ALLEGRO_SUGGEST);
+
+
+        int display_width = Config::getConfigInt(config, "game", "width");
+        int display_height = Config::getConfigInt(config, "game", "height");
+
+
+        if(display_width <= 800)  display_width = 800;
+        if(display_height <= 600) display_width = 600;
+
+
+        display = al_create_display(display_width, display_height);
+        if (!display) {
 			fprintf(stderr, "Failed to create display.\n");
-			return 1;
+            return 0;
 		}
 
         //force all bitmaps being used by GPU + better quality, less crisp
 		al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP | ALLEGRO_MIN_LINEAR | ALLEGRO_MIPMAP);
 
 		// Create the event queue
-		event_queue = al_create_event_queue();
-		if (!event_queue) {
+        event_queue = al_create_event_queue();
+        if (!event_queue) {
 			fprintf(stderr, "Failed to create event queue.");
 			return 1;
 		}
 
-		al_init_font_addon();
-		al_init_ttf_addon();
 
-		ALLEGRO_BITMAP *icon = nullptr;
+        if(!al_init_font_addon()){
+                fprintf(stderr, "font addon cannot be initialized!");
+        }
+
+
+        if(!al_init_ttf_addon()){
+            fprintf(stderr, "ttf addon cannot be initialized!");
+        }
+
+        if(!al_init_primitives_addon()){
+            fprintf(stderr, "primitives addon cannot be initialized!");
+        }
+
+        ALLEGRO_BITMAP *icon = nullptr;
 
 		if((icon = al_load_bitmap("pictures//gl.png")) != NULL ){
             al_set_display_icon(display, icon);
@@ -127,38 +164,106 @@ int init_allegro(void)
 
 
 		// Register event sources
-		al_register_event_source(event_queue, al_get_display_event_source(display));
-		al_register_event_source(event_queue, al_get_timer_event_source(timer));
-	    al_register_event_source(event_queue, al_get_keyboard_event_source());
-	    al_register_event_source(event_queue, al_get_mouse_event_source());
+        al_register_event_source(event_queue, al_get_display_event_source(display));
+        al_register_event_source(event_queue, al_get_timer_event_source(timer));
+        al_register_event_source(event_queue, al_get_keyboard_event_source());
+        al_register_event_source(event_queue, al_get_mouse_event_source());
 
 		// Display a black screen
 		al_clear_to_color(al_map_rgb(0, 0, 0));
 		al_flip_display();
 		// Start the timer
-		al_start_timer(timer);
-		al_init_primitives_addon();
+        al_start_timer(timer);
+
 
 
 
 		return 1;
 }
 
+
+
+
+static void S_processWindowEvents(ALLEGRO_EVENT& e){
+    if(e.type == ALLEGRO_EVENT_DISPLAY_CLOSE && !fullscreen){
+            g_gamestate = GameState::MAIN_MENU_SCREEN;
+    }
+
+    if(e.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING){
+        al_acknowledge_drawing_halt(display);
+        background_mode = true;
+    }
+
+    if(e.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING){
+        al_acknowledge_drawing_resume(display);
+        background_mode = false;
+    }
+
+    if(e.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT){
+        paused = true;
+    }
+
+    if(e.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN){
+        paused = false;
+    }
+
+
+    if(e.type == ALLEGRO_EVENT_KEY_DOWN){
+        if(e.keyboard.keycode == ALLEGRO_KEY_ESCAPE){
+            g_gamestate = GameState::MAIN_MENU_SCREEN;
+        }
+    }
+
+}
+
+
+static void S_processMenuEvents(ALLEGRO_EVENT& e, Menu& menu){
+    //esc to quit on in main menu
+    if(e.type  == ALLEGRO_EVENT_KEY_DOWN){
+
+
+
+        if(e.keyboard.keycode == ALLEGRO_KEY_UP || e.keyboard.keycode == ALLEGRO_KEY_W){
+            menu.moveMenuUp();
+        }
+
+        if(e.keyboard.keycode == ALLEGRO_KEY_DOWN || e.keyboard.keycode == ALLEGRO_KEY_S){
+            menu.moveMenuDown();
+        }
+
+        if(e.keyboard.keycode == ALLEGRO_KEY_ENTER || e.keyboard.keycode == ALLEGRO_KEY_SPACE){
+                menu.updateMenu();
+        }
+
+    }
+}
+
 int main()
 {
 
-	init_allegro();
+    if(!init_allegro()){
+        exit(0);
+    }
+
+
+
+    gameScreenContext mainMenuContext;
+    gameScreenContext gameContext;
+
+
+    int w,h;
+
+    w = al_get_display_width(display);
+    h = al_get_display_height(display);
+
+    //gameContext.setScreenSize(w, h);
 
 
 
 
-	gameScreenContext gameMainScreen;
-	gameMainScreen.setScreenSize(SCREEN_W, SCREEN_H);
 
 
-
-
-	hall hall1(50, 150, SCREEN_W, SCREEN_H);
+    hall hall1(50, 150, w, h);
 	myButton playButton(570, 40, 100, 100);
 	myButton resetButton(680, 40, 100, 100);
 	myButton restoreButton(800, 40, 100, 100);
@@ -242,92 +347,126 @@ int main()
 
     infoAbout.setButtonCallBack_OpenAbout(aboutButton);
 
-	gameMainScreen.insertComponent(&hall1);
-	gameMainScreen.insertComponent(&playButton);
-	gameMainScreen.insertComponent(&resetButton);
-	gameMainScreen.insertComponent(&restoreButton);
-	gameMainScreen.insertComponent(&funButton);
-	gameMainScreen.insertComponent(&saveButton);
-	gameMainScreen.insertComponent(&loadButton);
-	gameMainScreen.insertComponent(&prevSpeedButton);
-	gameMainScreen.insertComponent(&nextSpeedButton);
-	gameMainScreen.insertComponent(&text1);
-	gameMainScreen.insertComponent(&textGenerations);
-	gameMainScreen.insertComponent(&infoAbout);
-	gameMainScreen.insertComponent(&lessZoomButton);
-	gameMainScreen.insertComponent(&moreZoomButton);
-	gameMainScreen.insertComponent(&aboutButton);
-    gameMainScreen.setGlobalTimer(timer);
-	gameMainScreen.setGlobalDisplay(display);
-	gameMainScreen.setGlobalEventQueue(event_queue);
+    gameContext.insertComponent(&hall1);
+    gameContext.insertComponent(&playButton);
+    gameContext.insertComponent(&resetButton);
+    gameContext.insertComponent(&restoreButton);
+    gameContext.insertComponent(&funButton);
+    gameContext.insertComponent(&saveButton);
+    gameContext.insertComponent(&loadButton);
+    gameContext.insertComponent(&prevSpeedButton);
+    gameContext.insertComponent(&nextSpeedButton);
+    gameContext.insertComponent(&text1);
+    gameContext.insertComponent(&textGenerations);
+    gameContext.insertComponent(&infoAbout);
+    gameContext.insertComponent(&lessZoomButton);
+    gameContext.insertComponent(&moreZoomButton);
+    gameContext.insertComponent(&aboutButton);
+    gameContext.setGlobalTimer(timer);
+    gameContext.setGlobalDisplay(display);
+    gameContext.setGlobalEventQueue(event_queue);
+
+    Menu mainMenu(mainMenuContext);
+
+    mainMenu.addSingleButton("menu_start", "START");
+    mainMenu.addSingleButton("menu_load", "LOAD");
+    mainMenu.addSingleButton("menu_quit", "QUIT");
+
+    mainMenu.setMenuOptionFont("fonts//Game Of Squids.ttf",22,0);
+    mainMenu.setMenuOffset(al_get_display_width(display)/2 - 100, al_get_display_height(display)/2 - 100 , 36);
+
+    mainMenuContext.setGlobalTimer(timer);
+    mainMenuContext.setGlobalDisplay(display);
+    mainMenuContext.setGlobalEventQueue(event_queue);
+
 
 
     while(running){
+
         ALLEGRO_EVENT event;
         ALLEGRO_TIMEOUT timeout;
 
-        al_init_timeout(&timeout, MAX_TIMEOUT);
-        const bool has_event = al_wait_for_event_until(event_queue, &event, &timeout);
+        al_init_timeout(&timeout, 0.1);
 
-        if(has_event){
-            if(event.type == ALLEGRO_EVENT_DISPLAY_CLOSE){
-                running = false;
+
+        if(redraw){
+            redraw = false;
+            al_clear_to_color(al_map_rgb(0,0,0));
+            switch(g_gamestate){
+
+                case GameState::LOGO_SCREEN: break; //temporary disabled
+                case GameState::IN_GAME_SCREEN:
+                {
+                    gameContext.draw();
+                }
+                break;
+
+                case GameState::MAIN_MENU_SCREEN:
+                {
+                    mainMenu.drawTitle();
+                    mainMenu.drawMenuSelected();
+                    mainMenuContext.draw();
+                }
                 break;
             }
 
-            if(event.type == ALLEGRO_EVENT_TIMER){
-                if(!paused){
-                    gameMainScreen.update();
-                    redraw = true;
-                }
-            }
-
-
-            if(event.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING){
-                al_acknowledge_drawing_halt(display);
-                background_mode = true;
-            }
-
-            if(event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING){
-                al_acknowledge_drawing_resume(display);
-                background_mode = false;
-            }
-
-            if(event.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT){
-                paused = true;
-            }
-
-            if(event.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN){
-                paused = false;
-            }
-
-
-            if(event.type == ALLEGRO_EVENT_KEY_DOWN && fullscreen){
-                if(event.keyboard.keycode == ALLEGRO_KEY_ESCAPE){
-                    running = false;
-                }
-            }
-
-            gameMainScreen.update_input(&event);
-
-        }
-
-        if(redraw && al_event_queue_is_empty(event_queue) && !background_mode){
-            redraw = false;
-            al_clear_to_color(al_map_rgb(0,0,0));
-            gameMainScreen.draw();
             al_flip_display();
+
         }
+
+
+        while(al_wait_for_event_until(event_queue, &event, &timeout) ){
+
+
+            if(event.type == ALLEGRO_EVENT_TIMER){
+
+
+                switch(g_gamestate){
+
+                    case GameState::LOGO_SCREEN:
+                    case GameState::IN_GAME_SCREEN:
+                    {
+                        if(!paused){
+                            gameContext.update();
+                            redraw = true;
+                        }
+                    }
+                    break;
+
+
+                    case GameState::MAIN_MENU_SCREEN:
+                            mainMenuContext.update();
+                            redraw = true;
+                    break;
+                }
+
+
+            }
+
+
+            if(g_gamestate == GameState::IN_GAME_SCREEN){
+                 S_processWindowEvents(event);
+                 gameContext.update_input(&event);
+
+            }
+
+
+            if(g_gamestate == GameState::MAIN_MENU_SCREEN){
+                S_processMenuEvents(event, mainMenu);
+                mainMenuContext.update_input(&event);
+            }
+
+        };
 
     }
 
 
 
 	// Clean up
-	config.Unload();
-	al_destroy_display(display);
-	al_destroy_event_queue(event_queue);
-	al_destroy_timer(timer);
+    config.Unload();
+    al_destroy_display(display);
+    al_destroy_event_queue(event_queue);
+    al_destroy_timer(timer);
 
 	return 0;
 }

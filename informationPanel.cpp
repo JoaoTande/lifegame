@@ -10,7 +10,7 @@ myInformationPanel::myInformationPanel(){
 	closeButton.set_sprite1("pictures//close.png");
 	closeButton.set_sprite2("pictures//close.png");
 	closeButton.setPressedAlwaysFalse();
-	funcCallBack f1 = &myButtonCallBack::FuncCallBack;
+	funcCallBack f1 = &myButtonCallback::FuncCallBack;
 	closeButton.registerCallBack(this, f1);
 
     if( (gamefont = al_load_ttf_font("fonts//Game Of Squids.ttf", 30, 0)) == nullptr){
@@ -40,7 +40,7 @@ myInformationPanel::myInformationPanel(int x, int y, int sizeX, int sizeY){
 	closeButton.set_sprite1("pictures//close.png");
 	closeButton.set_sprite2("pictures//close.png");
 	closeButton.setPressedAlwaysFalse();
-	funcCallBack f1 = &myButtonCallBack::FuncCallBack;
+	funcCallBack f1 = &myButtonCallback::FuncCallBack;
 	closeButton.registerCallBack(this, f1);
 
 
@@ -106,7 +106,7 @@ void myInformationPanel::FuncCallBack(bool check){
 }
 
 void myInformationPanel::setButtonCallBack_OpenAbout(myButton &b1){
-    funcCallBack cb = &myButtonCallBack::FuncCallBack;
+    funcCallBack cb = &myButtonCallback::FuncCallBack;
     b1.registerCallBack(this,cb);
 }
 

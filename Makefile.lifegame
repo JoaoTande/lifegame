@@ -1,0 +1,41 @@
+CXX=g++
+CXXFLAGS=-std=c++14 -Wall -Werror -Wextra -Wno-switch -Wunused -O2
+LIBS=-lallegro -lallegro_primitives  -lallegro_font -lallegro_ttf -lallegro_image -lallegro_dialog
+INCLUDE=/usr/include
+
+BIN=lifeGame
+
+SRC=Menu.cpp \
+	bigTextLabel.cpp \
+	button.cpp \
+	config.cpp \
+	gameScreenContext.cpp \
+	hall.cpp \
+	informationPanel.cpp \
+	main.cpp
+
+#OBJ=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
+
+OBJ=Menu.o \
+          bigTextLabel.o \
+          button.o \
+          config.o \
+          gameScreenContext.o \
+          hall.o \
+          informationPanel.o \
+          main.o
+
+
+all: $(OBJ)
+	$(CXX) $(CXXFLAGS) -I$(INCLUDE) $(LIBS)  $^ -o $(BIN) 
+
+%.cpp : %.o 
+	$(CXX) -c $^ 	
+
+
+clear:
+clean:
+	rm -rf *.o $(BIN)
+
+
+PHONY: clean clear

@@ -16,7 +16,8 @@
 #include "interfaceComponent.h"
 #include "button.h"
 #include "hall.h"
-
+#include "config.h"
+#include <memory>
 
 class gameScreenContext{
 private:
@@ -26,6 +27,7 @@ private:
 	int screen_H;
 	std::vector<interfaceComponent*> list_of_components;
 
+
 public:
 	gameScreenContext();
 	virtual ~gameScreenContext(){}
@@ -34,7 +36,14 @@ public:
 	void setGlobalTimer(ALLEGRO_TIMER *timer);
    	void setGlobalDisplay(ALLEGRO_DISPLAY *dsp);
     void setGlobalEventQueue(ALLEGRO_EVENT_QUEUE *q);
-	void setComponents();
+    void setComponents();
+    void setConfig(Config &config);
+
+    int getScreenW(void) const { return screen_W; }
+    int getScreenH(void) const { return screen_H; }
+
+    Config* getConfig();
+
 	virtual void update();
 	virtual void update_input(ALLEGRO_EVENT *e);
 	virtual void draw();
