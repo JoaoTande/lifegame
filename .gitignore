@@ -1,0 +1,17 @@
+lifeGame
+*.o
+debug 
+bin
+obj
+codeblocks/bin*
+codeblocks/obj*
+!codeblocks/*.layout
+!codeblocks/*.depend
+SavedGame.*
+build-*
+release/
+debug/
+Makefile
+*.pro.user
+Makefile.Release
+Makefile.Debug
