@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="lifeGame" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/lifeGame" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="/home/archdark/projetos/cpp/lifegame" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++14" />
+					<Add option="-g" />
+					<Add directory="/opt/liballegro-5.2.7/include" />
+				</Compiler>
+				<Linker>
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_acodec.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_audio.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_color.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_dialog.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_font.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_image.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_main.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_memfile.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_primitives.so" />
+					<Add library="/opt/liballegro-5.2.7/lib/liballegro_ttf.so" />
+					<Add directory="/opt/liballegro-5.2.7/lib" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/lifeGame" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Debug Windows">
+				<Option output="bin/Debug/lifeGame" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../lifegame" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++14" />
+					<Add option="-g" />
+					<Add directory="D:/projetos/libs/allegro-5.2.7/include" />
+				</Compiler>
+				<Linker>
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_acodec.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_audio.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_color.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_dialog.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_font.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_image.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_main.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_memfile.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_physfs.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_primitives.dll.a" />
+					<Add library="D:/projetos/libs/allegro-5.2.7/lib/liballegro_ttf.dll.a" />
+					<Add directory="D:/projetos/libs/allegro-5.2.7/lib" />
+				</Linker>
+			</Target>
+			<Target title="Release Windows">
+				<Option output="bin/Release/lifeGame" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="../bigTextLabel.cpp" />
+		<Unit filename="../bigTextLabel.h" />
+		<Unit filename="../button.cpp" />
+		<Unit filename="../button.h" />
+		<Unit filename="../classCallBack.h" />
+		<Unit filename="../config.cpp" />
+		<Unit filename="../config.h" />
+		<Unit filename="../gameScreenContext.cpp" />
+		<Unit filename="../gameScreenContext.h" />
+		<Unit filename="../hall.cpp" />
+		<Unit filename="../hall.h" />
+		<Unit filename="../informationPanel.cpp" />
+		<Unit filename="../informationPanel.h" />
+		<Unit filename="../interfaceComponent.h" />
+		<Unit filename="../main.cpp" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>
