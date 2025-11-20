@@ -1,8 +1,8 @@
 # lifegame
 
---------------------------------------------
-How to run lifeGame on Linux Mint (Ubuntu)
---------------------------------------------
+-------------------------------------------------------------
+How to run lifeGame on Linux Mint (Ubuntu) (Ver. 1.0 - 2021)
+-------------------------------------------------------------
 
 1 - Install Allegro (See instruction bellow).
 
@@ -10,17 +10,19 @@ How to run lifeGame on Linux Mint (Ubuntu)
     chmod 777 lifeGame
 
 3 - After that just run the command:
-    ./lifeGame
+    ./lifeGame (Ver. 1.1 - 2025)
 
---------------------------------------------
-How to run lifeGame on Windows
---------------------------------------------
+-------------------------------------------------------------
+How to run lifeGame on Windows (Ver. 1.1 - 2025)
+-------------------------------------------------------------
 
-TBD
+1 - Download the folder dist-windows
 
---------------------------------------------
+2 - Run lifegame.exe  
+
+-------------------------------------------------------------
 How to install allegro on Ubuntu
---------------------------------------------
+-------------------------------------------------------------
 
 Ubuntu:
 
@@ -37,9 +39,9 @@ sudo apt-get update
 sudo apt-get install liballegro5-dev
 
 
---------------------------------------------
+-------------------------------------------------------------
 Where is the lifeGame source code?
---------------------------------------------
+-------------------------------------------------------------
 
 The source code is inside of the branch master:
     git checkout master
