@@ -16,10 +16,14 @@ hall::hall(int x, int y, int screen_Wj, int screen_Hj) : interfaceComponent() {
 	bloco_y0 = 0;
 
 	keys[6] = {0};
+	FPS_Count = 0;
 
 	ALLEGRO_MOUSE_STATE state;
 	al_get_mouse_state(&state);
 	lastScrollPosition = state.z;
+
+	Color_white = al_map_rgb(255,255,255);
+	Color_grey = al_map_rgb_f(0.3, 0.3, 0.3);
 
 	QuadradosList = new Quadrado*[numero_x];
 	for(int i = 0;i<numero_x;i++){
@@ -70,7 +74,7 @@ void hall::calcNumBlocs(){
 
 void hall::draw_line(){
    ALLEGRO_COLOR color;
-   color = al_map_rgb_f(0.3, 0.3, 0.3);
+   color = Color_grey;
    int x = x0;
    int y = y0;
    int length = numBloc_X*size;
@@ -89,9 +93,9 @@ void hall::draw_line(){
 }
 
 void hall::draw_text(){
-    al_draw_textf(text_font,al_map_rgb(255,255,255), x0, y0 - 35, 0, "HALL");
-    al_draw_textf(text_font,al_map_rgb(255,255,255), x0, y0 - 25, 0, "%d X %d", numero_x, numero_y);
-    al_draw_textf(text_font,al_map_rgb(255,255,255), x0, y0 - 15, 0, "Evolution Speed: %.2f", ev_speed[actual_speed].speed);
+    al_draw_textf(text_font,Color_white, x0, y0 - 35, 0, "HALL");
+    al_draw_textf(text_font,Color_white, x0, y0 - 25, 0, "%d X %d", numero_x, numero_y);
+    al_draw_textf(text_font,Color_white, x0, y0 - 15, 0, "Evolution Speed: %.2f", ev_speed[actual_speed].speed);
 }
 
 void hall::draw_markers(){
@@ -101,17 +105,17 @@ void hall::draw_markers(){
 	int m2 = bloco_y0+(step*2/size);
 	int m3 = bloco_y0+(step*3/size);
 	int m4 = bloco_y0+(step*4/size);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0-35, y0, 0, "%d-", m0);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0-35, y0+step, 0, "%d-", m1);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0-35, y0+step*2, 0, "%d-", m2);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0-35, y0+step*3, 0, "%d-", m3);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0-35, (y0+step*4)-size, 0, "%d-", m4);
+	al_draw_textf(text_font,Color_white, x0-35, y0, 0, "%d-", m0);
+	al_draw_textf(text_font,Color_white, x0-35, y0+step, 0, "%d-", m1);
+	al_draw_textf(text_font,Color_white, x0-35, y0+step*2, 0, "%d-", m2);
+	al_draw_textf(text_font,Color_white, x0-35, y0+step*3, 0, "%d-", m3);
+	al_draw_textf(text_font,Color_white, x0-35, (y0+step*4)-size, 0, "%d-", m4);
 
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0+(numBloc_X*size), y0, 0, "-%d", m0);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0+(numBloc_X*size), y0+step, 0, "-%d", m1);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0+(numBloc_X*size), y0+step*2, 0, "-%d", m2);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0+(numBloc_X*size), y0+step*3, 0, "-%d", m3);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0+(numBloc_X*size), (y0+step*4)-size, 0, "-%d", m4);
+	al_draw_textf(text_font,Color_white, x0+(numBloc_X*size), y0, 0, "-%d", m0);
+	al_draw_textf(text_font,Color_white, x0+(numBloc_X*size), y0+step, 0, "-%d", m1);
+	al_draw_textf(text_font,Color_white, x0+(numBloc_X*size), y0+step*2, 0, "-%d", m2);
+	al_draw_textf(text_font,Color_white, x0+(numBloc_X*size), y0+step*3, 0, "-%d", m3);
+	al_draw_textf(text_font,Color_white, x0+(numBloc_X*size), (y0+step*4)-size, 0, "-%d", m4);
 
 	step = (numBloc_X*size)/4;
 	m0 = bloco_x0;
@@ -119,11 +123,11 @@ void hall::draw_markers(){
 	m2 = bloco_x0+(step*2/size);
 	m3 = bloco_x0+(step*3/size);
 	m4 = bloco_x0+(step*4/size)-1;
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0, y0+(numBloc_Y*size)+5, 0, "|%d", m0);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0+step, y0+(numBloc_Y*size)+5, 0, "|%d", m1);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0+step*2, y0+(numBloc_Y*size)+5, 0, "|%d", m2);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0+step*3, y0+(numBloc_Y*size)+5, 0, "|%d", m3);
-	al_draw_textf(text_font,al_map_rgb(255,255,255), x0+step*4-size, y0+(numBloc_Y*size)+5, 0, "|%d", m4);
+	al_draw_textf(text_font,Color_white, x0, y0+(numBloc_Y*size)+5, 0, "|%d", m0);
+	al_draw_textf(text_font,Color_white, x0+step, y0+(numBloc_Y*size)+5, 0, "|%d", m1);
+	al_draw_textf(text_font,Color_white, x0+step*2, y0+(numBloc_Y*size)+5, 0, "|%d", m2);
+	al_draw_textf(text_font,Color_white, x0+step*3, y0+(numBloc_Y*size)+5, 0, "|%d", m3);
+	al_draw_textf(text_font,Color_white, x0+step*4-size, y0+(numBloc_Y*size)+5, 0, "|%d", m4);
 }
 
 void hall::resetAll(bool){
@@ -207,6 +211,29 @@ void hall::setButtonCallBack_LoadFile(myButton &b1){
 	buttonLoadFile = &b1;
 	funcCallBack f1 = &myButtonCallBack::loadFile;
 	b1.registerCallBack(this, f1);
+}
+
+void hall::setButtonCallBack_NextSpeed(myButton &b1){
+    funcCallBack cb = &myButtonCallBack::NextSpeed;
+    b1.registerCallBack(this,cb);
+}
+
+void hall::setButtonCallBack_PrevSpeed(myButton &b1){
+    funcCallBack cb = &myButtonCallBack::PrevSpeed;
+    b1.registerCallBack(this,cb);
+}
+
+void hall::setButtonCallBack_Zoom(myButton &b1){
+	funcCallBack cb = &myButtonCallBack::changeSize;
+	b1.registerCallBack(this,cb);
+}
+
+void hall::setTextGenerations(bigTextLabel<int> &t1){
+	t1.insertText("Generation #%d", &generationNumber);
+}
+
+void hall::setTextFPS(bigTextLabel<int> &t1){
+	t1.insertText("%d FPS", &FPS_Count);
 }
 
 void hall::saveFile(bool){
@@ -313,6 +340,12 @@ void hall::draw(){
 	}
 	draw_square_batch(buffer, nextPos-6);
 	delete[] buffer;
+	//----------------------------- FPS calc -----------------------------
+	fpsCounter.frameRendered();
+	if (fpsCounter.update()) {
+        FPS_Count = fpsCounter.getFPS();
+    }
+	//----------------------------- FPS calc -----------------------------
 }
 
 void hall::draw_square_batch(ALLEGRO_VERTEX *buffer, int vertex_count)
@@ -708,26 +741,6 @@ int hall::readFile (const std::string file) {
 	    myfile.close();
 	}
   return 0;
-}
-
-void hall::setButtonCallBack_NextSpeed(myButton &b1){
-    funcCallBack cb = &myButtonCallBack::NextSpeed;
-    b1.registerCallBack(this,cb);
-}
-
-void hall::setButtonCallBack_PrevSpeed(myButton &b1){
-    funcCallBack cb = &myButtonCallBack::PrevSpeed;
-    b1.registerCallBack(this,cb);
-}
-
-void hall::setButtonCallBack_Zoom(myButton &b1){
-	funcCallBack cb = &myButtonCallBack::changeSize;
-	b1.registerCallBack(this,cb);
-}
-
-
-void hall::setTextGenerations(bigTextLabel<int> &t1){
-	t1.insertText("Generation #%d", &generationNumber);
 }
 
 void hall::NextSpeed(bool)

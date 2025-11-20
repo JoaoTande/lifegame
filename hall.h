@@ -14,6 +14,7 @@
 #include "button.h"
 #include "bigTextLabel.h"
 #include "classCallBack.h"
+#include "FPSCounter.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -68,9 +69,13 @@ public:
 
 	void checkNeighbors(){
 		if(!checked){
-			if(number_of_neighbors == 3) toogle();
+			if(number_of_neighbors == 3) {
+				toogle();
+			}
 		}else{
-			if((number_of_neighbors < 2)||(number_of_neighbors > 3)) toogle();
+			if((number_of_neighbors < 2)||(number_of_neighbors > 3)){
+				toogle();
+			}
 		}
 	}
 
@@ -140,9 +145,14 @@ private:
 	Quadrado** QuadradosList;
 	Quadrado** QuadradosListBackup;
 
-	int keys[6];
+	int keys[7];
+	int FPS_Count;
+	FPSCounter fpsCounter;
 
 	ALLEGRO_FONT *text_font = NULL;
+
+	ALLEGRO_COLOR Color_white;
+	ALLEGRO_COLOR Color_grey;
 
 	myButton* buttonReset;
 	myButton* buttonRestore;
@@ -198,6 +208,7 @@ public:
 
 	Position get_Position(int pos_x, int pos_y);
 	void setTextGenerations(bigTextLabel<int> &t1);
+	void setTextFPS(bigTextLabel<int> &t1);
 	int contNeighbors(int x, int y);
 	void contAllNeighbors();
 	void calcNewBlocZeroZero(int pos_x, int pos_y, int nextSize);

@@ -174,6 +174,7 @@ int main()
 	//myButton moreZoomButton(1288,110,32,32);
 	bigTextLabel<int> text1(50,50);
 	bigTextLabel<int> textGenerations(320,135);
+	bigTextLabel<int> textFPS(320,120);
 	myInformationPanel infoAbout(200,200,450,270);
 
 	aboutButton.setPressedAlwaysTrue();
@@ -243,6 +244,7 @@ int main()
     hall1.setButtonCallBack_PrevSpeed(prevSpeedButton);
     hall1.setButtonCallBack_NextSpeed(nextSpeedButton);
     hall1.setTextGenerations(textGenerations);
+	hall1.setTextFPS(textFPS);
     hall1.setButtonCallBack_Zoom(lessZoomButton);
     hall1.setButtonCallBack_Zoom(moreZoomButton);
 
@@ -260,6 +262,7 @@ int main()
 	gameMainScreen.insertComponent(&nextSpeedButton);
 	gameMainScreen.insertComponent(&text1);
 	gameMainScreen.insertComponent(&textGenerations);
+	gameMainScreen.insertComponent(&textFPS);
 	gameMainScreen.insertComponent(&infoAbout);
 	gameMainScreen.insertComponent(&lessZoomButton);
 	gameMainScreen.insertComponent(&moreZoomButton);
