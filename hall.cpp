@@ -39,6 +39,7 @@ hall::hall(int x, int y, int screen_Wj, int screen_Hj) : interfaceComponent() {
 	buttonFunPatterns = nullptr;
 	buttonSaveFile = nullptr;
 	buttonLoadFile = nullptr;
+	buttonFillRand = nullptr;
 
 	play = false;
 	actual_speed = SPEED_NORMAL;
@@ -190,6 +191,12 @@ void hall::setButtonCallBack_FunPatterns(myButton &b1){
 	b1.registerCallBack(this, f1);
 }
 
+void hall::setButtonCallBack_FillRand(myButton &b1){
+	buttonFillRand = &b1;
+	funcCallBack f1 = &myButtonCallBack::fillRand;
+	b1.registerCallBack(this, f1);
+}
+
 void hall::setButtonCallBack_SaveFile(myButton &b1){
 	buttonSaveFile = &b1;
 	funcCallBack f1 = &myButtonCallBack::saveFile;
@@ -294,11 +301,33 @@ void hall::draw(){
 	draw_line();
 	draw_markers();
 	draw_text();
+	int sizeArray = numBloc_X*numBloc_Y*6;
+	ALLEGRO_VERTEX *buffer = new ALLEGRO_VERTEX[sizeArray];
+	int nextPos = 0;
+
 	for(int i = 0;i<numBloc_X;i++){
 		for(int j = 0;j<numBloc_Y;j++){
-			QuadradosList[i+bloco_x0][j+bloco_y0].draw();
+			//QuadradosList[i+bloco_x0][j+bloco_y0].draw(); //Draw Squares = Slow
+			nextPos = QuadradosList[i+bloco_x0][j+bloco_y0].drawFast(buffer, nextPos); //Draw a vector of triangles = Fast 
 		}
 	}
+	draw_square_batch(buffer, nextPos-6);
+	delete[] buffer;
+}
+
+void hall::draw_square_batch(ALLEGRO_VERTEX *buffer, int vertex_count)
+{
+    if (vertex_count <= 0) return;
+
+    // Draw all primitives at once (each 3 vertices = 1 triangle)
+    al_draw_prim(
+        buffer,        // vertex array
+        NULL,          // no custom vertex declaration
+        NULL,          // no texture source
+        0,             // start index
+        vertex_count,  // number of vertices to draw
+        ALLEGRO_PRIM_TRIANGLE_LIST
+    );
 }
 
 void hall::setQuadradoInf(){
@@ -562,6 +591,10 @@ void hall::calcNewBlocZeroZero(int pos_x, int pos_y, int nextSize){
 	}
 }
 
+void  hall::fillRand(bool){
+	fillRandomGrid();
+}
+
 void hall::loadFunPatterns(bool){
 
 	if(false){ // Speed up if I want to change the loadFunPatterns button action. True Random, False Fun.
@@ -618,6 +651,7 @@ void hall::FuncCallBack(bool pressed){
 	buttonFunPatterns->setVisible(!pressed);
 	buttonSaveFile->setVisible(!pressed);
 	buttonLoadFile->setVisible(!pressed);
+	buttonFillRand->setVisible(!pressed);	
 
 	if(pressed == true)makeScreenBackup();
 	play = pressed;

@@ -80,6 +80,40 @@ public:
 		}
 	}
 
+	int drawFast(ALLEGRO_VERTEX *buffer, int nextPos){
+		if(checked){
+			int ret = add_square_vertices(
+    		x, y,
+    		x+size, y+size,
+    		white,
+    		buffer,
+    		nextPos);
+			
+			return ret;
+		}
+		return nextPos;
+	}
+
+    int add_square_vertices(
+    float x1, float y1,
+    float x2, float y2,
+    ALLEGRO_COLOR color,
+    ALLEGRO_VERTEX *buffer,
+    int nextPos)   // index where the 6 vertices will be written
+	{
+    	// Triangle 1
+    	buffer[nextPos + 0].x = x1; buffer[nextPos + 0].y = y1; buffer[nextPos + 0].z = 0; buffer[nextPos + 0].color = color;
+    	buffer[nextPos + 1].x = x2; buffer[nextPos + 1].y = y1; buffer[nextPos + 1].z = 0; buffer[nextPos + 1].color = color;
+    	buffer[nextPos + 2].x = x1; buffer[nextPos + 2].y = y2; buffer[nextPos + 2].z = 0; buffer[nextPos + 2].color = color;
+
+    	// Triangle 2
+    	buffer[nextPos + 3].x = x2; buffer[nextPos + 3].y = y1; buffer[nextPos + 3].z = 0; buffer[nextPos + 3].color = color;
+    	buffer[nextPos + 4].x = x2; buffer[nextPos + 4].y = y2; buffer[nextPos + 4].z = 0; buffer[nextPos + 4].color = color;
+    	buffer[nextPos + 5].x = x1; buffer[nextPos + 5].y = y2; buffer[nextPos + 5].z = 0; buffer[nextPos + 5].color = color;
+
+    	return nextPos + 6;  // next free vertex slot
+	}
+
 	void toogle(){
 		if(checked){
 			checked = false;
@@ -113,6 +147,7 @@ private:
 	myButton* buttonReset;
 	myButton* buttonRestore;
 	myButton* buttonFunPatterns;
+	myButton* buttonFillRand;
 	myButton* buttonSaveFile;
 	myButton* buttonLoadFile;
 
@@ -173,6 +208,7 @@ public:
 	void setButtonCallBack_Reset(myButton &b1);
 	void setButtonCallBack_Restore(myButton &b1);
 	void setButtonCallBack_FunPatterns(myButton &b1);
+	void setButtonCallBack_FillRand(myButton &b1);
 	void setButtonCallBack_SaveFile(myButton &b1);
 	void setButtonCallBack_LoadFile(myButton &b1);
 	void setButtonCallBack_NextSpeed(myButton &b1);
@@ -181,6 +217,7 @@ public:
 	//CallBack Pointer Functions
 	void restoreScreenBackup(bool);
 	void loadFunPatterns(bool);
+	void fillRand(bool);
 	void FuncCallBack(bool);
 	void resetAll(bool);
 	void saveFile(bool);
@@ -188,6 +225,7 @@ public:
 	void NextSpeed(bool) override;
 	void PrevSpeed(bool) override;
 	void changeSize(bool zoom);
+	void draw_square_batch(ALLEGRO_VERTEX *buffer, int vertex_count);
 	virtual void draw();
 	virtual void update_input(ALLEGRO_EVENT *e);
 

@@ -16,6 +16,7 @@ public:
 	virtual void NextSpeed(bool){};
 	virtual void PrevSpeed(bool){};
 	virtual void changeSize(bool){};
+	virtual void fillRand(bool){};
 };
 
 #endif

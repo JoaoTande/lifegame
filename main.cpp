@@ -162,7 +162,8 @@ int main()
 	myButton playButton(570, 40, 100, 100);
 	myButton resetButton(680, 40, 100, 100);
 	myButton restoreButton(800, 40, 100, 100);
-	myButton funButton(910, 40, 100, 100);
+	myButton funButton(910, 40, 100, 45);
+	myButton fillRand(910, 95, 100, 45);
 	myButton saveButton(1020, 40, 100, 100);
 	myButton loadButton(1130, 40, 100, 100);
 	myButton prevSpeedButton(230,110,32,32);
@@ -200,6 +201,10 @@ int main()
 	funButton.set_sprite2("pictures//fun.png");
 	funButton.set_description("Generates fun patterns");
 
+	fillRand.set_sprite1("pictures//fill.png");
+	fillRand.set_sprite2("pictures//fill.png");
+	fillRand.set_description("Fill the screen randomly");
+
 	saveButton.set_sprite1("pictures//save.png");
 	saveButton.set_sprite2("pictures//save.png");
 	saveButton.set_description("Saves the grid to a file");
@@ -232,6 +237,7 @@ int main()
 	hall1.setButtonCallBack_Reset(resetButton);
 	hall1.setButtonCallBack_Restore(restoreButton);
     hall1.setButtonCallBack_FunPatterns(funButton);
+	hall1.setButtonCallBack_FillRand(fillRand);
     hall1.setButtonCallBack_SaveFile(saveButton);
 	hall1.setButtonCallBack_LoadFile(loadButton);
     hall1.setButtonCallBack_PrevSpeed(prevSpeedButton);
@@ -246,8 +252,9 @@ int main()
 	gameMainScreen.insertComponent(&playButton);
 	gameMainScreen.insertComponent(&resetButton);
 	gameMainScreen.insertComponent(&restoreButton);
-	gameMainScreen.insertComponent(&funButton);
 	gameMainScreen.insertComponent(&saveButton);
+	gameMainScreen.insertComponent(&fillRand);
+	gameMainScreen.insertComponent(&funButton);
 	gameMainScreen.insertComponent(&loadButton);
 	gameMainScreen.insertComponent(&prevSpeedButton);
 	gameMainScreen.insertComponent(&nextSpeedButton);
